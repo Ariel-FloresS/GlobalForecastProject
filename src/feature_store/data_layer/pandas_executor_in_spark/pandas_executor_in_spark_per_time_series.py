@@ -7,7 +7,7 @@ from typing import Callable
 class PandasExecutorInSparkPerTimeSeries(PandasExecutorInSparkPerTimeSeriesInterface):
 
 
-    def apply_per_series(spark_dataframe_to_apply_the_pandas_function:DataFrame,
+    def apply_per_series(self, spark_dataframe_to_apply_the_pandas_function:DataFrame,
                         function: Callable[[pd.DataFrame], pd.DataFrame],
                         output_schema:str)->DataFrame:
         
