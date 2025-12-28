@@ -9,11 +9,13 @@ class MSTLDecomposition(ExogenousVariableInterface):
 
     def __init__(self,
                 executor: PandasExecutorInSparkPerTimeSeriesInterface,
+                training_dataframe:DataFrame,
                 frequency:str,
                 season_length:int, 
                 horizon:int=0)->None:
         
         self.executor = executor
+        self.training_dataframe = training_dataframe
         self.frequency = frequency
         self.season_length = season_length
         self.horizon = horizon
@@ -24,50 +26,57 @@ class MSTLDecomposition(ExogenousVariableInterface):
                             seasonal double
                             """
         
-    def _mstl_decomposition_train(self,historical_pandas: pd.DataFrame)->pd.DataFrame:
 
-        historical_pandas:pd.DataFrame = historical_pandas.sort_values('ds')
-
-        train_dataframe, _ = mstl_decomposition(
-                df = historical_pandas,
-                model =  MSTL(season_length = self.season_length),
-                freq = self.frequency,
-                h = self.horizon + 1 
-        )
-
-        return train_dataframe.drop('y', axis = 1)
-    
-    def _mstl_decomposition_future(self,historical_pandas: pd.DataFrame)->pd.DataFrame:
-
-        historical_pandas:pd.DataFrame = historical_pandas.sort_values('ds')
-
-        _, X_df = mstl_decomposition(
-                df = historical_pandas,
-                model =  MSTL(season_length = self.season_length),
-                freq = self.frequency,
-                h = self.horizon 
-        )
-
-        return X_df
-    
 
     def compute_exogenous(self, historical: DataFrame)->DataFrame:
 
-        dataframe_base: DataFrame = historical.select('unique_id', 'ds', 'y')
+        dataframe_base: DataFrame = self.training_dataframe.select('unique_id', 'ds', 'y')
+
+        freq: str = self.frequency
+        season_length: int = self.season_length
+        horizon: int = self.horizon
 
         if self.horizon>0:
 
+            def future_wrapper(unique_id:str, pdf:pd.DataFrame)->pd.DataFrame:
+
+                pdf: pd.DataFrame = pdf.sort_values('ds')
+
+                _, X_df = mstl_decomposition(
+                    df = pdf,
+                    model =  MSTL(season_length = season_length),
+                    freq = freq,
+                    h = horizon 
+                )
+                return X_df
+
+                 
+
             mtsl_feats: DataFrame = self.executor.apply_per_series(
                 spark_dataframe_to_apply_the_pandas_function = dataframe_base,
-                function = self._mstl_decomposition_future,
+                function = future_wrapper,
                 output_schema = self._output_schema
             )
 
         else:
 
+            def train_wrapper(unique_id: str, pdf:pd.DataFrame)->pd.DataFrame:
+
+                pdf: pd.DataFrame = pdf.sort_values('ds')
+
+                train_dataframe, _ = mstl_decomposition(
+                    df = pdf,
+                    model =  MSTL(season_length = season_length),
+                    freq = freq,
+                    h = 1 
+                )
+
+                return train_dataframe.drop('y', axis = 1)
+
+
             mtsl_feats: DataFrame = self.executor.apply_per_series(
                 spark_dataframe_to_apply_the_pandas_function = dataframe_base,
-                function = self._mstl_decomposition_train,
+                function = train_wrapper,
                 output_schema = self._output_schema
             )
 
