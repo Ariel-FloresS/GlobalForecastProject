@@ -14,7 +14,7 @@ class GenerateFutureDataset(GenerateFutureDatasetInterface):
 
         ids_dataframe: DataFrame = historical_dataframe.select('unique_id').distinct()
 
-        start_date: datetime = historical_dataframe.agg(F.max('ds')).first()
+        start_date: datetime.date = historical_dataframe.select(F.max("ds").alias("max_ds")).first()["max_ds"]
 
         date_range: pd.DatetimeIndex = pd.date_range(start = start_date,
                                                     periods = horizon+1,
