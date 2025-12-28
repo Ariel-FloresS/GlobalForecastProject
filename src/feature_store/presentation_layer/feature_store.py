@@ -21,6 +21,7 @@ class FeatureStore(FeatureStoreInterface):
         exogenous_variables: List[ExogenousVariableInterface] = [
 
             MSTLDecomposition(executor = self.pandas_executor,
+                              training_dataframe = historical,
                               frequency = self.frequency,
                               season_length = self.season_length)
         ]
@@ -36,6 +37,7 @@ class FeatureStore(FeatureStoreInterface):
         exogenous_variables: List[ExogenousVariableInterface] = [
 
             MSTLDecomposition(executor = self.pandas_executor,
+                              training_dataframe = historical,
                               frequency = self.frequency,
                               season_length = self.season_length,
                               horizon = horizon)
