@@ -1,4 +1,4 @@
-from forecasting.cluster_spec_selector.cluter_spec_selector_interface import ClusterSpecSelectorInterface
+from .cluter_spec_selector_interface import ClusterSpecSelectorInterface
 from forecasting.config import ModelSpec, MODEL_SPECS_BY_CLASS
 from typing import Dict
 
