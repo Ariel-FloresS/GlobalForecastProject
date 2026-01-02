@@ -4,6 +4,7 @@ from forecasting.model_factory import ModelFactoryInterface, DistributedModel
 from forecasting.forecasting_engine import DistributedForecastingEngineInterface, DistributedForecastingEngine
 from forecasting.config import ModelSpec
 from pyspark.sql import DataFrame
+from pyspark.sql.column import Column
 import pyspark.sql.functions as F
 from typing import Optional, List
 
@@ -46,6 +47,28 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
         distributed_forecast_engine.fit(traing_dataset = classification_training_dataset, static_features = static_features)
 
         predictions_dataframe: DataFrame = distributed_forecast_engine.predict(prediction_horizon = horizon, future_dataframe = future_dataset_classification)
+
+        prediction_columns: List[str] =[ col for col in predictions_dataframe.columns if col not in ['unique_id', 'ds'] ]
+
+        if len(prediction_columns)==1:
+
+            predictions_dataframe: DataFrame = (predictions_dataframe
+                                                .withColumnRenamed(prediction_columns[0], 'y_pred')
+                                                .select('unique_id', 'ds', 'y_pred')
+                                                )
+        else:
+
+            sum_expr: Column = sum( F.coalesce(F.col(c), F.lit(0.0)) for c in prediction_columns )
+            count_expr: Column = sum( F.when(F.col(c).isNotNull(), F.lit(1)).otherwise(F.lit(0)) for c in prediction_columns )
+
+            predictions_dataframe: DataFrame = (predictions_dataframe
+                                                .withColumn('y_pred', 
+                                                            F.when(count_expr > 0, sum_expr / count_expr)
+                                                            .otherwise(F.lit(None).cast("double"))
+                                                            )
+                                                .select('unique_id', 'ds', 'y_pred')
+                                                )
+
 
         return predictions_dataframe
 
