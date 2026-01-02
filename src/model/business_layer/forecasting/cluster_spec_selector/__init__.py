@@ -1,2 +1,2 @@
-from .cluter_spec_selector_interface import ClusterSpecSelectorInterface
+from .cluster_spec_selector_interface import ClusterSpecSelectorInterface
 from .cluster_spec_selector import ClusterSpecSelector
