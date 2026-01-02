@@ -13,8 +13,9 @@ class ForecastDataRepository(ForecastDataRepositoryInterface):
         save_dataframe: DataFrame = (forecast_dataframe
                                      .withColumn('unique_id', F.col('unique_id').cast('string'))
                                      .withColumn('ds', F.col('ds').cast('date'))
+                                     .withColumn('y_pred', F.col('y_pred').cast('double'))
                                      .withColumn("process_date", F.current_timestamp())
                                      )
         
-        save_dataframe.write.mode('append').option("mergeSchema", "true").saveAsTable(delta)
+        save_dataframe.write.mode('append').saveAsTable(delta)
 
