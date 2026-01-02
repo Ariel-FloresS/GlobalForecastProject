@@ -1,0 +1,6 @@
+from typing import Protocol
+
+class DistributedModel(Protocol):
+     
+     def fit(self, *args, **kwargs): ...
+     def predict(self, *args, **kwargs): ...
