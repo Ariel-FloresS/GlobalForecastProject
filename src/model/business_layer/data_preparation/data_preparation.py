@@ -3,6 +3,7 @@ from model.data_layer.repositories.training_data import  TrainingDataRepositoryI
 from model.data_layer.dataset_partitioning import DatasetPartitioningInterface
 from feature_store.presentation_layer import FeatureStoreInterface
 from pyspark.sql import DataFrame
+import pyspark.sql.functions as F
 from typing import Tuple, List
 
 
@@ -32,6 +33,9 @@ class DataPreparation(DataPreparationInterface):
         future_dataset: DataFrame = self.feature_store.future_dataset(historical =  training_dataset, 
                                                                       horizon =  horizon)
         
+        training_dataset: DataFrame = training_dataset.withColumn('ds', F.to_timestamp('ds'))
+        future_dataset: DataFrame = future_dataset.withColumn('ds', F.to_timestamp('ds'))
+
         return training_dataset, future_dataset
         
 
