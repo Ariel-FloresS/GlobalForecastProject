@@ -10,20 +10,20 @@ MODEL_SPECS_BY_CLASS: Dict[str, ModelSpec] = {
         lags = [1,4],
         lag_transforms = {1:[RollingMean(window_size = 3)],
                         4:[RollingMean(window_size = 6)]},
-        target_transforms = [Differences(1)],
+        target_transforms = [Differences([1])],
         models = {
-            'lgbm':{'type': 'lgbm', 'params':{'learning_rate':0.01, 'n_estimators':1000}},
+            'lgbm':{'type': 'lgbm', 'params':{'seed':0, 'numIterations':1000}},
             'xgb':{'type': 'xgb', 'params':{'n_estimators':500, 'max_depth':6}}
         }
     ),
 
     'Erratic': ModelSpec(
         name = 'erratic_xgb',
-        lags=[1, 2, 3, 6, 12, 18, 24, 36],
+        lags=[1, 2, 3],
         lag_transforms={
             1: [ExpandingStd()],
-            3: [RollingMean(window_size=3, min_samples=1)],
-            12: [ExponentiallyWeightedMean(alpha=0.5)],
+            2: [RollingMean(window_size=3, min_samples=1)],
+            3: [ExponentiallyWeightedMean(alpha=0.5)],
         },
         target_transforms=[LocalStandardScaler()],
         models = {
@@ -32,15 +32,15 @@ MODEL_SPECS_BY_CLASS: Dict[str, ModelSpec] = {
     ),
     'Lumpy': ModelSpec(
         name = 'lumpy_lgbm',
-        lags = [1, 2, 3, 6, 12, 18, 24],
+        lags = [1, 2, 3],
         lag_transforms={
             1: [ExpandingStd()],
-            6: [RollingMean(window_size=6, min_samples=1), RollingMean(window_size=12, min_samples=1)],
-            12: [ExponentiallyWeightedMean(alpha=0.3)],
+            2: [RollingMean(window_size=6, min_samples=1), RollingMean(window_size=12, min_samples=1)],
+            3: [ExponentiallyWeightedMean(alpha=0.3)],
         },
         target_transforms=[Differences([1]),LocalStandardScaler()],
         models = {
-            'lgbm': {'type':'lgbm', 'params':{'n_estimators':200, 'num_leaves':21, 'max_depth':10}}
+            'lgbm': {'type':'lgbm', 'params':{'learningRate':0.01, 'numIterations':1000}}
         }
     ),
     'Intermittent': ModelSpec(
@@ -52,7 +52,7 @@ MODEL_SPECS_BY_CLASS: Dict[str, ModelSpec] = {
         },
         target_transforms=[Differences([1])],
         models = {
-            'xgb': {'type': 'xgb', 'params':{'n_estimators':300, 'learning_rate':0.05, 'subsample':0.8}}
+            'xgb': {'type': 'xgb', 'params':{'n_estimators':300,  'subsample':0.8}}
         }
     )
 
