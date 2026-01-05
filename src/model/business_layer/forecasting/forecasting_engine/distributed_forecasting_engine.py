@@ -58,9 +58,9 @@ class DistributedForecastingEngine(DistributedForecastingEngineInterface):
         return future_dataframe_pandas
 
 
-    def fit(self, traing_dataset:DataFrame, static_features:Optional[List[str]] = None)->Self:
+    def fit(self, training_dataset:DataFrame, static_features:Optional[List[str]] = None)->Self:
 
-        self.distributed_ml_forecast.fit(df =  traing_dataset, static_features = static_features)
+        self.distributed_ml_forecast.fit(df =  training_dataset, static_features = static_features)
 
         self._is_trained = True
 
@@ -82,10 +82,10 @@ class DistributedForecastingEngine(DistributedForecastingEngineInterface):
         # X_df must be pandas per Nixtla's API contract
         return self.distributed_ml_forecast.predict(h = prediction_horizon, X_df = future_dataframe_pandas)
     
-    def cross_validation(self, traing_dataset:DataFrame, windows:int,
+    def cross_validation(self, training_dataset:DataFrame, windows:int,
                         periods_for_each_window:int, static_features:Optional[List[str]] = None)->DataFrame:
         
-        cross_validation_dataframe: DataFrame = self.distributed_ml_forecast.cross_validation(df = traing_dataset,
+        cross_validation_dataframe: DataFrame = self.distributed_ml_forecast.cross_validation(df = training_dataset,
                                                                                               n_windows = windows,
                                                                                               h = periods_for_each_window,
                                                                                               static_features = static_features)
