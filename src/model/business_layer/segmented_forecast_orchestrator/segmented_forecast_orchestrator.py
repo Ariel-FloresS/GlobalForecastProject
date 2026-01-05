@@ -43,8 +43,11 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
                                                                                                           lags = model_spec.lags,
                                                                                                           lag_transforms = model_spec.lag_transforms,
                                                                                                           target_transforms = model_spec.target_transforms)
+        if not static_features:
+
+            static_features: List[None] = []
         
-        distributed_forecast_engine.fit(traing_dataset = classification_training_dataset, static_features = static_features)
+        distributed_forecast_engine.fit(training_dataset = classification_training_dataset, static_features = static_features)
 
         predictions_dataframe: DataFrame = distributed_forecast_engine.predict(prediction_horizon = horizon, future_dataframe = future_dataset_classification)
 
