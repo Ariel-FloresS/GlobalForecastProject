@@ -26,7 +26,7 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
     def forecast(self, training_dataset: DataFrame, future_dataset: DataFrame, frequency:str,horizon: int, static_features:Optional[List[str]] = None)->DataFrame:
 
 
-        classification_training_dataset: DataFrame = training_dataset.filter(F.col('classification')== self.classification)
+        classification_training_dataset: DataFrame = training_dataset.filter(F.col('classification')== self.classification).drop('classification')
 
         unique_ids_classification: DataFrame = classification_training_dataset.select('unique_id').distinct()
 
@@ -50,6 +50,9 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
 
         prediction_columns: List[str] =[ col for col in predictions_dataframe.columns if col not in ['unique_id', 'ds'] ]
 
+
+        # When only one model is used, its output is taken as the final forecast.
+        # When multiple models are used, their predictions are combined using a mean ensemble.
         if len(prediction_columns)==1:
 
             predictions_dataframe: DataFrame = (predictions_dataframe

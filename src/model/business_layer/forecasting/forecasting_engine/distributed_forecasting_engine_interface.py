@@ -5,7 +5,7 @@ from typing import List, Optional, Self
 class DistributedForecastingEngineInterface(ABC):
 
     @abstractmethod
-    def fit(self, traing_dataset:DataFrame, static_features:Optional[List[str]] = None)->Self:
+    def fit(self, training_dataset:DataFrame, static_features:Optional[List[str]] = None)->Self:
         raise NotImplementedError
     
     @abstractmethod
@@ -13,7 +13,7 @@ class DistributedForecastingEngineInterface(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def cross_validation(self,traing_dataset:DataFrame, windows:int,
+    def cross_validation(self,training_dataset:DataFrame, windows:int,
                         periods_for_each_window:int, static_features:Optional[List[str]] = None)->DataFrame:
         raise NotImplementedError
     
