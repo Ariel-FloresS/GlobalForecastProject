@@ -28,6 +28,17 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
 
         classification_training_dataset: DataFrame = training_dataset.filter(F.col('classification')== self.classification).drop('classification')
 
+        if classification_training_dataset.rdd.isEmpty():
+
+            empty_predictions: DataFrame = (
+                classification_training_dataset
+                .select('unique_id', 'ds')
+                .withColumn('y_pred', F.lit(None).cast('double'))
+                .limit(0)
+            )
+
+            return empty_predictions
+
         unique_ids_classification: DataFrame = classification_training_dataset.select('unique_id').distinct()
 
         future_dataset_classification: DataFrame = (future_dataset 
