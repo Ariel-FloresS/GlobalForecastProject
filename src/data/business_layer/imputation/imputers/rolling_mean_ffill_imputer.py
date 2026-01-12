@@ -1,4 +1,4 @@
-from imputation.imputer_interface import ImputerInterface
+from .imputer_interface import ImputerInterface
 from pyspark.sql import DataFrame, Window, Column
 import pyspark.sql.functions as F
 from loguru import logger
@@ -20,7 +20,7 @@ class RollingMeanFFillImputer(ImputerInterface):
         logger.info(f"Starting:  {step_name}: imputing with rolling mean + ffill (k={self.window_size}).")
 
         if self.window_size < 1: raise ValueError('window_size must be >= 1')
-        
+
         w_roll: Window = (
             Window.partitionBy('unique_id')
                   .orderBy('ds')

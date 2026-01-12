@@ -1,4 +1,4 @@
-from imputation.imputer_interface import ImputerInterface
+from .imputer_interface import ImputerInterface
 from pyspark.sql import DataFrame, Window, Column
 import pyspark.sql.functions as F
 from loguru import logger

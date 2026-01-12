@@ -1,3 +1,4 @@
+from .imputer_interface import ImputerInterface
 from .rolling_mean_ffill_imputer import RollingMeanFFillImputer
 from .rolling_mean_ffill_imputer import RollingMeanFFillImputer
 from .zero_fill_imputer import ZeroFillImputer
