@@ -1,3 +1,4 @@
+from .data_cleaning_step_interface import DataCleaningStepInterface
 from .drop_inactive_recent_series_step import DropInactiveRecentSeriesStep
 from .drop_short_series_step import DropShortSeriesStep
 from .drop_short_series_step import DropShortSeriesStep

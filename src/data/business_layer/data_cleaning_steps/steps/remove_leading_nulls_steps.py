@@ -1,4 +1,4 @@
-from business_layer.data_cleaning_steps import DataCleaningStepInterface
+from .data_cleaning_step_interface import DataCleaningStepInterface
 from pyspark.sql import DataFrame
 import pyspark.sql.functions as F
 from loguru import logger
