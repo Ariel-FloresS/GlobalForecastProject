@@ -1,6 +1,7 @@
 from .raw_data_repository_interface import RawDataRepositoryInterface
 from pyspark.sql import DataFrame, SparkSession
 import pyspark.sql.functions as F
+from loguru import logger
 from typing import List
 
 class RawDataRepository(RawDataRepositoryInterface):
@@ -10,9 +11,11 @@ class RawDataRepository(RawDataRepositoryInterface):
 
     def load_raw_data(self, delta:str, id_column:str, time_column:str, target_column:str)->DataFrame:
 
+        step_name: str = self.__class__.__name__
+
         if not delta or not delta.strip():
 
-            raise ValueError('delta must be a non-empty string.')
+            raise ValueError(f'[{step_name}] delta must be a non-empty string.')
 
         input_dataframe: DataFrame = self.spark.sql(f'SELECT * FROM {delta}')
 
@@ -22,7 +25,7 @@ class RawDataRepository(RawDataRepositoryInterface):
 
         if missing_cols:
 
-            raise ValueError(f"Missing required columns '{missing_cols}' in delta '{delta}'.")
+            raise ValueError(f"[{step_name}] Missing required columns '{missing_cols}' in delta '{delta}'.")
         
 
         input_dataframe: DataFrame = input_dataframe.select(required_cols)
@@ -37,6 +40,7 @@ class RawDataRepository(RawDataRepositoryInterface):
             )
         )
 
+        logger.info(f"[{step_name}] raw data loaded successfully.")
         return out
         
         
