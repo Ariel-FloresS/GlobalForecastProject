@@ -5,7 +5,7 @@ from typing import List
 
 class TrainingDataRepository(TrainingDataRepositoryInterface):
 
-    REQUIRED_COLUMNS: List[str] = ['unique_id', 'ds', 'y']
+    REQUIRED_COLUMNS: List[str] = ['unique_id', 'ds', 'y', 'classification']
 
     def save_training_data(self, training_dataframe:DataFrame, delta:str, exogenous_columns:List[str])->None:
 
