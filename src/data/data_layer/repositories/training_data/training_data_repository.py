@@ -1,5 +1,6 @@
 from .training_data_repository_interface import TrainingDataRepositoryInterface
 from pyspark.sql import DataFrame, SparkSession
+import pyspark.sql.functions as F
 from loguru import logger
 from typing import List
 
