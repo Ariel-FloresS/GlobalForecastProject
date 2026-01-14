@@ -1,4 +1,4 @@
-from imputation.imputers import ImputerInterface, RollingMeanFFillImputer, RollingMedianFFillImputer, ZeroFillImputer
+from business_layer.imputation.imputers import ImputerInterface, RollingMeanFFillImputer, RollingMedianFFillImputer, ZeroFillImputer
 from typing import Dict
 
 IMPUTER_BY_CLASS: Dict[str, ImputerInterface] = {
