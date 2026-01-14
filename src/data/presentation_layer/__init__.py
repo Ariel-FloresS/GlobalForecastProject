@@ -1,2 +1,2 @@
 from .data_pipeline_interface import DataPipelineInterface
-from .data_pipeline import DataCleaningPipeline
+from .data_pipeline import DataPipeline

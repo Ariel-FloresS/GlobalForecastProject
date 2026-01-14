@@ -64,7 +64,7 @@ class DataPipeline(DataPipelineInterface):
                                                             season_length = self.season_length
                                                             )
 
-        training_dataset: DataFrame = feature_store.train_dataset()
+        training_dataset: DataFrame = feature_store.train_dataset(historical = cleaning_dataset)
 
         TrainingDataRepository().save_training_data(training_dataframe = training_dataset,
                                                     delta = self.training_delta_table,
