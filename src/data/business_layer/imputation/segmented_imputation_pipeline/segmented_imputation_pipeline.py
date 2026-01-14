@@ -13,7 +13,7 @@ class SegmentedImputationPipeline(SegmentedImputationPipelineInterface):
 
     def __init__(self, imputer_by_class: Dict[str, ImputerInterface] = IMPUTER_BY_CLASS)->None:
 
-        self.imputer_by_class = imputer_by_class
+        self._imputer_by_class = imputer_by_class
 
         self._known_classes: List[str] = ['Smooth', 'Intermittent', 'Erratic', 'Lumpy']
 
@@ -48,7 +48,7 @@ class SegmentedImputationPipeline(SegmentedImputationPipelineInterface):
         for cls in self._known_classes:
 
             cls_df: DataFrame = operate_dataframe.filter(F.col("classification") == F.lit(cls))
-            imputer: ImputerInterface = self.imputer_by_class[cls]
+            imputer: ImputerInterface = self._imputer_by_class[cls]
             imputed_cls_df: DataFrame = imputer.impute(dataset = cls_df)
             imputed_parts.append(imputed_cls_df)
 
