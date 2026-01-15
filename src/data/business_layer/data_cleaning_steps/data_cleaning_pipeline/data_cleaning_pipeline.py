@@ -1,5 +1,5 @@
 from .data_cleaning_pipeline_interface import DataCleaningPipelineInterface
-from business_layer.data_cleaning_steps.steps import DataCleaningStepInterface
+from data.business_layer.data_cleaning_steps.steps import DataCleaningStepInterface
 from pyspark.sql import DataFrame
 from loguru import logger
 from typing import List
