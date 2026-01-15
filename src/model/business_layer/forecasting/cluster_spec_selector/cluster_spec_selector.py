@@ -1,5 +1,5 @@
 from .cluster_spec_selector_interface import ClusterSpecSelectorInterface
-from forecasting.config import ModelSpec, MODEL_SPECS_BY_CLASS
+from model.business_layer.forecasting.config import ModelSpec, MODEL_SPECS_BY_CLASS
 from typing import Dict
 
 class ClusterSpecSelector(ClusterSpecSelectorInterface):
