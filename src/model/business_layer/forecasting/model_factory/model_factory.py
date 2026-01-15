@@ -1,6 +1,6 @@
 from .model_factory_interface import ModelFactoryInterface
 from .distributed_model import DistributedModel
-from forecasting.cluster_spec_selector import ClusterSpecSelector
+from model.business_layer.forecasting.cluster_spec_selector import ClusterSpecSelector
 from typing import Dict, Any, List
 
 class ModelFactory(ModelFactoryInterface):
