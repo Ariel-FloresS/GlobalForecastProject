@@ -35,7 +35,7 @@ class DropShortSeriesStep(DataCleaningStepInterface):
             .select("unique_id").distinct()
         )
 
-        if short_series_df.rdd.isEmpty():
+        if short_series_df.limit(1).count() == 0:
             logger.info(
                 f"{step_name}: All series have at least {self.min_records} records"
             )

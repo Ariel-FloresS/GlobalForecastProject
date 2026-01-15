@@ -57,7 +57,7 @@ class DropInactiveRecentSeriesStep(DataCleaningStepInterface):
             .distinct()
         )
 
-        if inactive_ids_df.rdd.isEmpty():
+        if inactive_ids_df.limit(1).count() == 0:
             logger.info(f"{step_name}: No series with >= {self.inactivity_periods} trailing zeros found, returning original dataframe")
             return input_dataframe
 

@@ -10,8 +10,6 @@ class DropZeroOnlySeriesStep(DataCleaningStepInterface):
 
         step_name: str = self.__class__.__name__
 
-        logger.info(f"Starting: {step_name}")
-
         ids_zero_only_series: DataFrame = (
             input_dataframe
             .groupBy('unique_id')
@@ -20,7 +18,7 @@ class DropZeroOnlySeriesStep(DataCleaningStepInterface):
             .select('unique_id')
         )
 
-        if ids_zero_only_series.rdd.isEmpty():
+        if ids_zero_only_series.limit(1).count() == 0:
 
             logger.info(f"{step_name}: No zero-only series found. Skipping.")
 
