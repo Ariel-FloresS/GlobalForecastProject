@@ -7,10 +7,9 @@ from loguru import logger
 class RemoveLeadingZeroesStep(DataCleaningStepInterface):
 
     def apply_transformation(self, input_dataframe: DataFrame) -> DataFrame:
-        step_name: str = self.__class__.__name__
-        logger.info(f"Starting: {step_name}")
 
-       
+        step_name: str = self.__class__.__name__
+        
         first_nonzero_df: DataFrame = (
             input_dataframe
             .groupBy("unique_id")
@@ -30,5 +29,5 @@ class RemoveLeadingZeroesStep(DataCleaningStepInterface):
             .drop("first_nonzero_ds")
         )
 
-        logger.info(f"Finished: {step_name}")
+        logger.info(f"{step_name}: leading zeros trimmed where applicable.")
         return output_dataframe

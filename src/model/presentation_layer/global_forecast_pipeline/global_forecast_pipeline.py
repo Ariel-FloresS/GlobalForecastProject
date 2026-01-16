@@ -1,11 +1,11 @@
 from .global_forecast_pipeline_interface import GlobalForecastPipelineInterface
-from data_layer.repositories.training_data import  TrainingDataRepository
-from data_layer.repositories.forecast_data import ForecastDataRepositoryInterface, ForecastDataRepository
-from data_layer.dataset_partitioning import  DatasetPartitioning
-from business_layer.data_preparation import DataPreparationInterface, DataPreparation
-from business_layer.forecasting.cluster_spec_selector import ClusterSpecSelector
-from business_layer.forecasting.model_factory import ModelFactory
-from business_layer.segmented_forecast_orchestrator import SegmentedForecastOrchestatorInterface, SegmentedForecastOrchestator
+from model.data_layer.repositories.training_data import  TrainingDataRepository
+from model.data_layer.repositories.forecast_data import ForecastDataRepositoryInterface, ForecastDataRepository
+from model.data_layer.dataset_partitioning import  DatasetPartitioning
+from model.business_layer.data_preparation import DataPreparationInterface, DataPreparation
+from model.business_layer.forecasting.cluster_spec_selector import ClusterSpecSelector
+from model.business_layer.forecasting.model_factory import ModelFactory
+from model.business_layer.segmented_forecast_orchestrator import SegmentedForecastOrchestatorInterface, SegmentedForecastOrchestator
 from feature_store.presentation_layer import  FeatureStore
 from pyspark.sql import DataFrame, SparkSession
 from typing import List, Optional

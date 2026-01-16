@@ -1,7 +1,8 @@
 from .classifier_interface import ClassifierInterface
-from pyspark.sql import DataFrame, Column
+from pyspark.sql import DataFrame, Column,Row
 import pyspark.sql.functions as F
 from loguru import logger
+from typing import List
 
 
 
@@ -26,7 +27,9 @@ class DemanClassifierFrepple(ClassifierInterface):
 
         step_name: str = self.__class__.__name__
 
-        logger.info(f"{step_name}: Starting demand classification (FrePPLe ADI/CV²).")
+        banner_top: str = f"\n{'='*84}\n[CLASSIFICATION START]   {step_name}\n{'='*84}"
+
+        logger.info(banner_top)
 
         y_nonzero: Column = F.when(F.col('y') > 0, F.col('y'))
 
@@ -74,5 +77,22 @@ class DemanClassifierFrepple(ClassifierInterface):
         out: DataFrame = dataset.join(metrics, on="unique_id", how="left")
 
         logger.info(f"{step_name}: Finished Added column `classification`.")
+
+        counts_df: DataFrame = (
+            out.select("unique_id", "classification")
+            .distinct()
+            .groupBy("classification")
+            .agg(F.count(F.lit(1)).alias("n_series"))
+        )
+        rows: List[Row] = counts_df.collect()  
+        dist: Dict[str, int] = {r["classification"]: int(r["n_series"]) for r in rows}
+
+        ordered_classes: List[str] = ["Smooth", "Intermittent", "Erratic", "Lumpy"]
+        dist_str: str = " | ".join([f"{c}={dist.get(c, 0)}" for c in ordered_classes])
+        logger.info(f"[CLASSIFICATION] {step_name}: series distribution -> {dist_str}")
+
+        
+        banner_bottom: str = f"\n{'='*84}\n[CLASSIFICATION END]   {step_name}\n{'='*84}"
+        logger.info(banner_bottom)
 
         return out

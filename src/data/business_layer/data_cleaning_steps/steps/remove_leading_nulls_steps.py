@@ -9,8 +9,6 @@ class RemoveLeadingNullsStep(DataCleaningStepInterface):
     def apply_transformation(self, input_dataframe: DataFrame) -> DataFrame:
 
         step_name: str = self.__class__.__name__
-        logger.info(f"Starting: {step_name}")
-
         
         first_nonnull_df: DataFrame = (
             input_dataframe
@@ -30,6 +28,9 @@ class RemoveLeadingNullsStep(DataCleaningStepInterface):
             .drop("first_nonnull_ds")
         )
 
-        logger.info(f"Finished: {step_name}")
+        logger.info(
+            f"{step_name}: leading null values trimmed where applicable."
+        )
+
         
         return output_dataframe

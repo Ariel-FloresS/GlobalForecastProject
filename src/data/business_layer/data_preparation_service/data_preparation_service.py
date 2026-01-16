@@ -1,7 +1,7 @@
 from .data_preparation_service_interface import DataPreparationSeviceInterface
-from business_layer.data_cleaning_steps.data_cleaning_pipeline import DataCleaningPipelineInterface
-from business_layer.classification import ClassifierInterface
-from business_layer.imputation.segmented_imputation_pipeline import SegmentedImputationPipelineInterface
+from data.business_layer.data_cleaning_steps.data_cleaning_pipeline import DataCleaningPipelineInterface
+from data.business_layer.classification import ClassifierInterface
+from data.business_layer.imputation.segmented_imputation_pipeline import SegmentedImputationPipelineInterface
 from pyspark.sql import DataFrame, SparkSession
 
 

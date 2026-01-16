@@ -1,7 +1,7 @@
 from .distributed_forecasting_engine_interface import DistributedForecastingEngineInterface
 from pyspark.sql import DataFrame, SparkSession
 from mlforecast.distributed.forecast import DistributedMLForecast
-from forecasting.model_factory import DistributedModel
+from model.business_layer.forecasting.model_factory import DistributedModel
 from typing import List, Optional, Dict, Any, Self
 import pandas as pd
 

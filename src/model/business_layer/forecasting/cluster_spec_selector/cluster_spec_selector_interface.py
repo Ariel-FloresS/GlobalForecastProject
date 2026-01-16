@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from forecasting.config import ModelSpec
+from model.business_layer.forecasting.config import ModelSpec
 
 class ClusterSpecSelectorInterface(ABC):
 
