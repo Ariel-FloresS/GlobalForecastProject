@@ -27,7 +27,8 @@ class DataPreparation(DataPreparationInterface):
                                                     static_features:Optional[List[str]] = None)->Tuple[DataFrame, DataFrame]:
         
         training_dataframe: DataFrame = self.training_repository.load_training_data(delta = training_delta_table,
-                                                                                    exogenous_columns = exogenous_columns)
+                                                                                    exogenous_columns = exogenous_columns,
+                                                                                    static_features = static_features)
         
         training_dataset: DataFrame = self.dataset_partitioning.get_dataset_partition(dataset = training_dataframe,
                                                                                     partition_column = self._partition_column)
