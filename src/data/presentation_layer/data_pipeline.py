@@ -122,7 +122,9 @@ class DataPipeline(DataPipelineInterface):
         
         training_dataset: DataFrame = feature_store.train_dataset(historical = train_cleaning_dataset)
 
-        future_dataset: DataFrame = feature_store.future_dataset(historical = train_cleaning_dataset, horizon = horizon)
+        future_dataset: DataFrame = feature_store.future_dataset(historical = train_cleaning_dataset,
+                                                                horizon = horizon,
+                                                                static_features = self.static_features)
 
 
         bounds_train: Row = (
