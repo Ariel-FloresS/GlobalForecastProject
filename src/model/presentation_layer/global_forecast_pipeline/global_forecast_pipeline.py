@@ -20,7 +20,7 @@ class GlobalForecastPipeline(GlobalForecastPipelineInterface):
         self.exogenous_columns = exogenous_columns
         self.forecast_data_delta_table = forecast_data_delta_table
 
-    def forecast(self ,frequency:str, season_lenght:int, horizon:int, static_features:Optional[List[str]] = None)->None:
+    def forecast(self ,frequency:str, season_lenght:int, horizon:int, version:str ,static_features:Optional[List[str]] = None)->None:
         
         pipeline_name: str = self.__class__.__name__
 
@@ -91,7 +91,8 @@ class GlobalForecastPipeline(GlobalForecastPipelineInterface):
                                                   )
         
         forecast_data_repository.save_forecast_data(forecast_dataframe = prediction_dataframe_output,
-                                                     delta = self.forecast_data_delta_table)
+                                                     delta = self.forecast_data_delta_table,
+                                                     version = version)
         
         banner_end: str = f"\n{'='*84}\n[FORECAST PIPELINE END]   {pipeline_name}\n{'='*84}"
         logger.info(banner_end)
