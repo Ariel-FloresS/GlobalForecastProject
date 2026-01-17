@@ -7,6 +7,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.column import Column
 import pyspark.sql.functions as F
 from typing import Optional, List
+from loguru import logger
 
 
 class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
@@ -25,6 +26,9 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
 
     def forecast(self, training_dataset: DataFrame, future_dataset: DataFrame, frequency:str,horizon: int, static_features:Optional[List[str]] = None)->DataFrame:
 
+        step_name: str = self.__class__.__name__
+
+        logger.info(f"[{step_name}] Start Forecast for the classification: {self.classification}.\n")
 
         classification_training_dataset: DataFrame = training_dataset.filter(F.col('classification')== self.classification).drop('classification')
 
@@ -36,6 +40,8 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
                 .withColumn('y_pred', F.lit(None).cast('double'))
                 .limit(0)
             )
+
+            logger.info(f"[{step_name}] There is no Training Data for the classification '{self.classification}' Skipping The Training Process.\n")
 
             return empty_predictions
 
@@ -54,9 +60,7 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
                                                                                                           lags = model_spec.lags,
                                                                                                           lag_transforms = model_spec.lag_transforms,
                                                                                                           target_transforms = model_spec.target_transforms)
-        if not static_features:
-
-            static_features: List[None] = []
+        static_features: List[str] = static_features or []
         
         distributed_forecast_engine.fit(training_dataset = classification_training_dataset, static_features = static_features)
 
@@ -86,7 +90,7 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
                                                 .select('unique_id', 'ds', 'y_pred')
                                                 )
 
-
+        logger.info(f"[{step_name}] End Forecast for the classification: {self.classification}.\n")
         return predictions_dataframe
 
 
