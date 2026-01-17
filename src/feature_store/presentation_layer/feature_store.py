@@ -4,17 +4,18 @@ from feature_store.data_layer.pandas_executor_in_spark import PandasExecutorInSp
 from feature_store.data_layer.inbound.data_adapter import InboundDataAdapter
 from feature_store.business_layer.exogenous import MSTLDecomposition, ExogenousVariableInterface
 from pyspark.sql import DataFrame, SparkSession
-from typing import List
+from typing import List, Optional
 
 
 class FeatureStore(FeatureStoreInterface):
 
-    def __init__(self, spark: SparkSession, frequency:str, season_length:int)->None:
+    def __init__(self, spark: SparkSession, frequency:str, season_length:int, static_features:Optional[List[str]] = None)->None:
         self.spark = spark
         self.frequency = frequency
         self.season_length = season_length
         self.pandas_executor = PandasExecutorInSparkPerTimeSeries()
         self.inbound_adapter = InboundDataAdapter()
+        self.static_features = static_features
 
     def train_dataset(self, historical: DataFrame)->DataFrame:
 
@@ -50,7 +51,8 @@ class FeatureStore(FeatureStoreInterface):
         return feature_service.generate_future_dataset(spark = self.spark,
                                                        historical = historical,
                                                        horizon = horizon,
-                                                        frequency = self.frequency )
+                                                        frequency = self.frequency,
+                                                        static_features = self.static_features )
 
 
         
