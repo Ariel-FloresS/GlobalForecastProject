@@ -9,13 +9,12 @@ from typing import List, Optional
 
 class FeatureStore(FeatureStoreInterface):
 
-    def __init__(self, spark: SparkSession, frequency:str, season_length:int, static_features:Optional[List[str]] = None)->None:
+    def __init__(self, spark: SparkSession, frequency:str, season_length:int)->None:
         self.spark = spark
         self.frequency = frequency
         self.season_length = season_length
         self.pandas_executor = PandasExecutorInSparkPerTimeSeries()
         self.inbound_adapter = InboundDataAdapter()
-        self.static_features = static_features
 
     def train_dataset(self, historical: DataFrame)->DataFrame:
 
@@ -33,7 +32,7 @@ class FeatureStore(FeatureStoreInterface):
         
         return feature_service.generate_train_dataset(historical = historical)
 
-    def future_dataset(self,historical: DataFrame, horizon:int)->DataFrame:
+    def future_dataset(self,historical: DataFrame, horizon:int, static_features:Optional[List[str]] = None)->DataFrame:
 
         exogenous_variables: List[ExogenousVariableInterface] = [
 
@@ -52,7 +51,7 @@ class FeatureStore(FeatureStoreInterface):
                                                        historical = historical,
                                                        horizon = horizon,
                                                         frequency = self.frequency,
-                                                        static_features = self.static_features )
+                                                        static_features = static_features )
 
 
         

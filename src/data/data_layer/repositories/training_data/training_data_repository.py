@@ -2,13 +2,13 @@ from .training_data_repository_interface import TrainingDataRepositoryInterface
 from pyspark.sql import DataFrame, SparkSession
 import pyspark.sql.functions as F
 from loguru import logger
-from typing import List
+from typing import List, Optional
 
 class TrainingDataRepository(TrainingDataRepositoryInterface):
 
     REQUIRED_COLUMNS: List[str] = ['unique_id', 'ds', 'y', 'classification']
 
-    def save_training_data(self, training_dataframe:DataFrame, delta:str, exogenous_columns:List[str])->None:
+    def save_training_data(self, training_dataframe:DataFrame, delta:str, exogenous_columns:List[str], static_features:Optional[List[str]] = None)->None:
 
         step_name: str = self.__class__.__name__
 
@@ -17,8 +17,10 @@ class TrainingDataRepository(TrainingDataRepositoryInterface):
 
         if not delta or not isinstance(delta, str):
             raise ValueError(f"[{step_name}] delta must be a non-empty string.")
+        
+        static_features: List[str] = static_features
 
-        necessary_columns: List[str] = self.REQUIRED_COLUMNS + exogenous_columns
+        necessary_columns: List[str] = self.REQUIRED_COLUMNS + exogenous_columns + static_features
 
         missing_required_columns: List[str] = [col for col in necessary_columns if col not in training_dataframe.columns]
 
@@ -52,8 +54,10 @@ class TrainingDataRepository(TrainingDataRepositoryInterface):
 
         save_dataframe.write.mode('overwrite').saveAsTable(delta)
 
+        logger.info(f"[{step_name}] Training dataset persisted successfully into '{delta}'.")
+
         banner_bottom: str = f"\n{'='*84}\n[TRAIN DATA REPOSITORY END]   {step_name}\n{'='*84}"
         logger.info(banner_bottom)
 
-        logger.info(f"[{step_name}] Training dataset persisted successfully into '{delta}'.")
+        
 
