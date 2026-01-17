@@ -43,7 +43,7 @@ class DataPipeline(DataPipelineInterface):
     def _generate_cleaning_dataset(self, raw_dataset:DataFrame)->DataFrame:
 
         data_cleaning_steps: List[DataCleaningStepInterface] = [
-            FillMissingDatesStep(spark = self.spark, frequency = self.frequency),
+            FillMissingDatesStep(spark = self.spark, frequency = self.frequency, static_features = self.static_features),
             RemoveLeadingNullsStep(),
             RemoveLeadingZeroesStep(),
             DropZeroOnlySeriesStep(),
