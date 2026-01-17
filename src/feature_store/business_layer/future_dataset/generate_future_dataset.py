@@ -3,16 +3,19 @@ from pyspark.sql import DataFrame, SparkSession
 import pyspark.sql.functions as F
 import pandas as pd
 import datetime 
-from typing import List
+from typing import List, Optional
 
 
 class GenerateFutureDataset(GenerateFutureDatasetInterface):
 
     def generate_dataset(self, spark: SparkSession, historical_dataframe:DataFrame,
-                        horizon:int, frequency:str)->DataFrame:
+                        horizon:int, frequency:str , static_features:Optional[List[str]] = None)->DataFrame:
         
+        list_static_features:List[str] = static_features or []
 
-        ids_dataframe: DataFrame = historical_dataframe.select('unique_id').distinct()
+        static_columns: List[str] = ['unique_id'] + list_static_features
+
+        ids_dataframe: DataFrame = historical_dataframe.select(static_columns).distinct()
 
         start_date: datetime.date = historical_dataframe.select(F.max("ds").alias("max_ds")).first()["max_ds"]
 

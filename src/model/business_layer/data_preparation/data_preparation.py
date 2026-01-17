@@ -4,7 +4,7 @@ from model.data_layer.dataset_partitioning import DatasetPartitioningInterface
 from feature_store.presentation_layer import FeatureStoreInterface
 from pyspark.sql import DataFrame
 import pyspark.sql.functions as F
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 
 class DataPreparation(DataPreparationInterface):
@@ -22,16 +22,20 @@ class DataPreparation(DataPreparationInterface):
     
 
     def prepare_batch_training_and_future_datasets(self, training_delta_table: str,
-                                                    exogenous_columns: List[str], horizon:int)->Tuple[DataFrame, DataFrame]:
+                                                    exogenous_columns: List[str],
+                                                    horizon:int,
+                                                    static_features:Optional[List[str]] = None)->Tuple[DataFrame, DataFrame]:
         
         training_dataframe: DataFrame = self.training_repository.load_training_data(delta = training_delta_table,
-                                                                                    exogenous_columns = exogenous_columns)
+                                                                                    exogenous_columns = exogenous_columns,
+                                                                                    static_features = static_features)
         
         training_dataset: DataFrame = self.dataset_partitioning.get_dataset_partition(dataset = training_dataframe,
                                                                                     partition_column = self._partition_column)
         
         future_dataset: DataFrame = self.feature_store.future_dataset(historical =  training_dataset, 
-                                                                      horizon =  horizon)
+                                                                      horizon =  horizon,
+                                                                      static_features = static_features)
         
         training_dataset: DataFrame = training_dataset.withColumn('ds', F.to_timestamp('ds'))
         future_dataset: DataFrame = future_dataset.withColumn('ds', F.to_timestamp('ds'))

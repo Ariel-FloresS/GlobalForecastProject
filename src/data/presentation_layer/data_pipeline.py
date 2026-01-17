@@ -43,7 +43,7 @@ class DataPipeline(DataPipelineInterface):
     def _generate_cleaning_dataset(self, raw_dataset:DataFrame)->DataFrame:
 
         data_cleaning_steps: List[DataCleaningStepInterface] = [
-            FillMissingDatesStep(spark = self.spark, frequency = self.frequency),
+            FillMissingDatesStep(spark = self.spark, frequency = self.frequency, static_features = self.static_features),
             RemoveLeadingNullsStep(),
             RemoveLeadingZeroesStep(),
             DropZeroOnlySeriesStep(),
@@ -122,7 +122,9 @@ class DataPipeline(DataPipelineInterface):
         
         training_dataset: DataFrame = feature_store.train_dataset(historical = train_cleaning_dataset)
 
-        future_dataset: DataFrame = feature_store.future_dataset(historical = train_cleaning_dataset, horizon = horizon)
+        future_dataset: DataFrame = feature_store.future_dataset(historical = train_cleaning_dataset,
+                                                                horizon = horizon,
+                                                                static_features = self.static_features)
 
 
         bounds_train: Row = (

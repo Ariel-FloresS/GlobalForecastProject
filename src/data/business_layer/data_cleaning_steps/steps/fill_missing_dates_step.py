@@ -4,13 +4,15 @@ import pyspark.sql.functions as F
 import pandas as pd
 import datetime
 from loguru import logger
+from typing import List, Optional
 
 class FillMissingDatesStep(DataCleaningStepInterface):
 
-    def __init__(self, spark:SparkSession, frequency:str)->None:
+    def __init__(self, spark:SparkSession, frequency:str, static_features:Optional[List[str]] = None)->None:
 
         self.spark = spark
         self.frequency = frequency
+        self.static_features = static_features
         
 
     def apply_transformation(self, input_dataframe:DataFrame)->DataFrame:
@@ -19,7 +21,11 @@ class FillMissingDatesStep(DataCleaningStepInterface):
 
         logger.info(f"Starting: {step_name}")
 
-        ids_dataframe: DataFrame = input_dataframe.select('unique_id').distinct()
+        list_static_features:List[str] = self.static_features or []
+
+        static_columns: List[str] = ['unique_id'] + list_static_features
+        
+        ids_dataframe: DataFrame = input_dataframe.select(static_columns).distinct()
 
         bounds: Row = (
             input_dataframe
