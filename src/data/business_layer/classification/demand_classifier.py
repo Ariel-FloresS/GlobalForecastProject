@@ -2,7 +2,7 @@ from .classifier_interface import ClassifierInterface
 from pyspark.sql import DataFrame, Column,Row
 import pyspark.sql.functions as F
 from loguru import logger
-from typing import List
+from typing import List, Dict
 
 
 
