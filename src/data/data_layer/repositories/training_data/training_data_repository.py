@@ -52,5 +52,8 @@ class TrainingDataRepository(TrainingDataRepositoryInterface):
 
         save_dataframe.write.mode('overwrite').saveAsTable(delta)
 
+        banner_bottom: str = f"\n{'='*84}\n[TRAIN DATA REPOSITORY END]   {step_name}\n{'='*84}"
+        logger.info(banner_bottom)
+
         logger.info(f"[{step_name}] Training dataset persisted successfully into '{delta}'.")
 
