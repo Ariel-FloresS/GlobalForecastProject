@@ -9,6 +9,7 @@ from model.business_layer.segmented_forecast_orchestrator import SegmentedForeca
 from feature_store.presentation_layer import  FeatureStore
 from pyspark.sql import DataFrame, SparkSession
 from typing import List, Optional
+from loguru import logger
 
 
 class GlobalForecastPipeline(GlobalForecastPipelineInterface):
@@ -20,6 +21,11 @@ class GlobalForecastPipeline(GlobalForecastPipelineInterface):
         self.forecast_data_delta_table = forecast_data_delta_table
 
     def forecast(self ,frequency:str, season_lenght:int, horizon:int, static_features:Optional[List[str]] = None)->None:
+        
+        pipeline_name: str = self.__class__.__name__
+
+        banner_top: str = f"\n{'='*84}\n[FORECAST PIPELINE START]   {pipeline_name}\n{'='*84}"
+        logger.info(banner_top)
 
         forecast_data_repository: ForecastDataRepositoryInterface = ForecastDataRepository()
         
@@ -31,7 +37,8 @@ class GlobalForecastPipeline(GlobalForecastPipelineInterface):
         
         training_dataset, future_dataset = data_preparation_pipeline.prepare_batch_training_and_future_datasets(training_delta_table = self.training_delta_table,
                                                                                                                 exogenous_columns = self.exogenous_columns,
-                                                                                                                horizon = horizon)
+                                                                                                                horizon = horizon,
+                                                                                                                static_features = static_features)
         
         smooth_segmented_forecast: SegmentedForecastOrchestatorInterface = SegmentedForecastOrchestator(classification = 'Smooth', 
                                                                                                         cluster_spec_selector = ClusterSpecSelector(),
@@ -85,6 +92,9 @@ class GlobalForecastPipeline(GlobalForecastPipelineInterface):
         
         forecast_data_repository.save_forecast_data(forecast_dataframe = prediction_dataframe_output,
                                                      delta = self.forecast_data_delta_table)
+        
+        banner_end: str = f"\n{'='*84}\n[FORECAST PIPELINE END]   {pipeline_name}\n{'='*84}"
+        logger.info(banner_end)
     
 
         
