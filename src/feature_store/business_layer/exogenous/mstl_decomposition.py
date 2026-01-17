@@ -3,6 +3,7 @@ from feature_store.data_layer.pandas_executor_in_spark import PandasExecutorInSp
 from statsforecast.models import MSTL
 from statsforecast.feature_engineering import mstl_decomposition
 from pyspark.sql import DataFrame
+from loguru import logger
 import pandas as pd
 
 class MSTLDecomposition(ExogenousVariableInterface):
@@ -29,6 +30,10 @@ class MSTLDecomposition(ExogenousVariableInterface):
 
 
     def compute_exogenous(self, historical: DataFrame)->DataFrame:
+
+        step_name: str = self.__class__.__name__
+
+        logger.info(f"Starting: {step_name}")
 
         dataframe_base: DataFrame = self.training_dataframe.select('unique_id', 'ds', 'y')
 
@@ -80,4 +85,6 @@ class MSTLDecomposition(ExogenousVariableInterface):
                 output_schema = self._output_schema
             )
 
+        logger.info(f"Finishing: {step_name}")
+        
         return historical.join(other = mtsl_feats, on = ['unique_id', 'ds'], how='left')
