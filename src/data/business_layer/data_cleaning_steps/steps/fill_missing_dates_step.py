@@ -47,8 +47,10 @@ class FillMissingDatesStep(DataCleaningStepInterface):
 
         complete_dates_dataframe: DataFrame = ids_dataframe.crossJoin(dates_dataframe)
 
+        right_dataframe: DataFrame = input_dataframe.drop(*list_static_features)
+
         output_dataframe: DataFrame = complete_dates_dataframe.join(
-            other = input_dataframe, on = ['unique_id', 'ds'], how = 'leftouter'
+            other = right_dataframe, on = ['unique_id', 'ds'], how = 'leftouter'
         )
         
         logger.info(f"Finishing: {step_name}")

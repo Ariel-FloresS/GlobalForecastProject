@@ -91,7 +91,8 @@ class DataPipeline(DataPipelineInterface):
 
         TrainingDataRepository().save_training_data(training_dataframe = training_dataset,
                                                     delta = self.training_delta_table,
-                                                    exogenous_columns = self.exogenous_columns)
+                                                    exogenous_columns = self.exogenous_columns,
+                                                    static_features = self.static_features)
         
 
         banner_end: str = f"\n{'='*84}\n[DATA PIPELINE END]   {pipeline_name}\n{'='*84}"

@@ -18,7 +18,7 @@ class TrainingDataRepository(TrainingDataRepositoryInterface):
         if not delta or not isinstance(delta, str):
             raise ValueError(f"[{step_name}] delta must be a non-empty string.")
         
-        static_features: List[str] = static_features
+        static_features: List[str] = static_features or []
 
         necessary_columns: List[str] = self.REQUIRED_COLUMNS + exogenous_columns + static_features
 
