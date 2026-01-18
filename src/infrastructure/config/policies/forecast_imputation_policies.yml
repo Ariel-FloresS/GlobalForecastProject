@@ -1,0 +1,159 @@
+forecast_config:
+  raw_delta_table: "raw_delta_table_example"
+  columns:
+    ids:
+      - "unique_id"
+    time: "ds"
+    target: "y"
+  horizon: 12
+  static_features:
+    - "category"
+    - "brand"
+  exogenous_variables:
+    - "price"
+    - "promo"
+
+forecasting_policies:
+  Smooth:
+    model_spec:
+      name: "smooth_lgbm_xgb"
+      lags: [1, 4]
+      lag_transforms:
+        "1":
+          - class: "mlforecast.lag_transforms.RollingMean"
+            params:
+              window_size: 3
+            output_type: "float"
+        "4":
+          - class: "mlforecast.lag_transforms.RollingMean"
+            params:
+              window_size: 6
+            output_type: "float"
+      target_transforms:
+        - class: "mlforecast.target_transforms.Differences"
+          args:
+            - [1]
+          output_type: "float"
+      models:
+        lgbm:
+          type: "lgbm"
+          params:
+            seed: 0
+            numIterations: 1000
+        xgb:
+          type: "xgb"
+          params:
+            n_estimators: 500
+            max_depth: 6
+  Erratic:
+    model_spec:
+      name: "erratic_xgb"
+      lags: [1, 2, 3]
+      lag_transforms:
+        "1":
+          - class: "mlforecast.lag_transforms.ExpandingStd"
+            params: {}
+            output_type: "float"
+        "2":
+          - class: "mlforecast.lag_transforms.RollingMean"
+            params:
+              window_size: 3
+              min_samples: 1
+            output_type: "float"
+        "3":
+          - class: "mlforecast.lag_transforms.ExponentiallyWeightedMean"
+            params:
+              alpha: 0.5
+            output_type: "float"
+      target_transforms:
+        - class: "mlforecast.target_transforms.LocalStandardScaler"
+          params: {}
+          output_type: "float"
+      models:
+        xgb:
+          type: "xgb"
+          params:
+            n_estimators: 500
+            max_depth: 6
+  Lumpy:
+    model_spec:
+      name: "lumpy_lgbm"
+      lags: [1, 2, 3]
+      lag_transforms:
+        "1":
+          - class: "mlforecast.lag_transforms.ExpandingStd"
+            params: {}
+            output_type: "float"
+        "2":
+          - class: "mlforecast.lag_transforms.RollingMean"
+            params:
+              window_size: 6
+              min_samples: 1
+            output_type: "float"
+          - class: "mlforecast.lag_transforms.RollingMean"
+            params:
+              window_size: 12
+              min_samples: 1
+            output_type: "float"
+        "3":
+          - class: "mlforecast.lag_transforms.ExponentiallyWeightedMean"
+            params:
+              alpha: 0.3
+            output_type: "float"
+      target_transforms:
+        - class: "mlforecast.target_transforms.Differences"
+          args:
+            - [1]
+          output_type: "float"
+        - class: "mlforecast.target_transforms.LocalStandardScaler"
+          params: {}
+          output_type: "float"
+      models:
+        lgbm:
+          type: "lgbm"
+          params:
+            learningRate: 0.01
+            numIterations: 1000
+  Intermittent:
+    model_spec:
+      name: "intermittent_xgb"
+      lags: [1, 3, 6, 12]
+      lag_transforms:
+        "1":
+          - class: "mlforecast.lag_transforms.ExpandingStd"
+            params: {}
+            output_type: "float"
+        "12":
+          - class: "mlforecast.lag_transforms.RollingMean"
+            params:
+              window_size: 12
+              min_samples: 1
+            output_type: "float"
+      target_transforms:
+        - class: "mlforecast.target_transforms.Differences"
+          args:
+            - [1]
+          output_type: "float"
+      models:
+        xgb:
+          type: "xgb"
+          params:
+            n_estimators: 300
+            subsample: 0.8
+
+imputation_policies:
+  Smooth:
+    class: "data.business_layer.imputation.imputers.RollingMeanFFillImputer"
+    params:
+      window_size: 3
+  Erratic:
+    class: "data.business_layer.imputation.imputers.RollingMedianFFillImputer"
+    params:
+      window_size: 4
+  Intermittent:
+    class: "data.business_layer.imputation.imputers.ZeroFillImputer"
+    params: {}
+  Lumpy:
+    class: "data.business_layer.imputation.imputers.RollingMedianFFillImputer"
+    params:
+      window_size: 12
