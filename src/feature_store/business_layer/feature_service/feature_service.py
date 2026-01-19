@@ -32,7 +32,7 @@ class FeatureService(FeatureServiceInterface):
         return historical
     
     def generate_future_dataset(self, spark:SparkSession, historical: DataFrame,
-                                horizon: int, frequency: str, static_features:Optional[List[str]] = None)->DataFrame:
+                                horizon: int, frequency: str)->DataFrame:
         step_name: str = self.__class__.__name__
         
         logger.info(f"[{step_name}] Generating Exogenous Variables For Future Dataset")
@@ -45,7 +45,7 @@ class FeatureService(FeatureServiceInterface):
                                                                           historical_dataframe = historical,
                                                                           horizon = horizon,
                                                                           frequency = frequency,
-                                                                          static_features = static_features)
+                                                                        )
         
         for exogenous in self.list_exogenous_variables:
 
