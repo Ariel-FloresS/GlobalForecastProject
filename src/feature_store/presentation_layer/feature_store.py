@@ -32,7 +32,7 @@ class FeatureStore(FeatureStoreInterface):
         
         return feature_service.generate_train_dataset(historical = historical)
 
-    def future_dataset(self,historical: DataFrame, horizon:int, static_features:Optional[List[str]] = None)->DataFrame:
+    def future_dataset(self,historical: DataFrame, horizon:int)->DataFrame:
 
         exogenous_variables: List[ExogenousVariableInterface] = [
 
@@ -50,8 +50,7 @@ class FeatureStore(FeatureStoreInterface):
         return feature_service.generate_future_dataset(spark = self.spark,
                                                        historical = historical,
                                                        horizon = horizon,
-                                                        frequency = self.frequency,
-                                                        static_features = static_features )
+                                                        frequency = self.frequency)
 
 
         

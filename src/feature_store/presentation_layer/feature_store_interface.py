@@ -9,5 +9,5 @@ class FeatureStoreInterface(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def future_dataset(self,historical: DataFrame, horizon:int, static_features:Optional[List[str]] = None)->DataFrame:
+    def future_dataset(self,historical: DataFrame, horizon:int)->DataFrame:
         raise NotImplementedError
