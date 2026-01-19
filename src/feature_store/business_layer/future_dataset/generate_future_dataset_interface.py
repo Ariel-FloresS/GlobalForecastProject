@@ -7,7 +7,7 @@ class GenerateFutureDatasetInterface(ABC):
 
     @abstractmethod
     def generate_dataset(self, spark: SparkSession, historical_dataframe:DataFrame,
-                        horizon:int, frequency:str , static_features:Optional[List[str]] = None)->DataFrame:
+                        horizon:int, frequency:str)->DataFrame:
         
         raise NotImplementedError
 
