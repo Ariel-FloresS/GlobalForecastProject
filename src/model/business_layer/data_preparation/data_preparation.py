@@ -34,8 +34,7 @@ class DataPreparation(DataPreparationInterface):
                                                                                     partition_column = self._partition_column)
         
         future_dataset: DataFrame = self.feature_store.future_dataset(historical =  training_dataset, 
-                                                                      horizon =  horizon,
-                                                                      static_features = static_features)
+                                                                      horizon =  horizon)
         
         training_dataset: DataFrame = training_dataset.withColumn('ds', F.to_timestamp('ds'))
         future_dataset: DataFrame = future_dataset.withColumn('ds', F.to_timestamp('ds'))
