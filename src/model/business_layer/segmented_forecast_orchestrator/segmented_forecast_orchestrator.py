@@ -94,6 +94,60 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
         return predictions_dataframe
 
 
+    def cross_validation(self,
+                        training_dataset:DataFrame,
+                        frequency:str,
+                        windows:int,
+                        periods_for_each_window:int,
+                        static_features:Optional[List[str]] = None)->DataFrame:
+        
+        step_name: str = self.__class__.__name__
+
+        logger.info(f"[{step_name}] Start Cross Validation For the Classification: {self.classification}.\n")
+
+        classification_training_dataset: DataFrame = training_dataset.filter(F.col('classification')== self.classification).drop('classification')
+
+        if classification_training_dataset.rdd.isEmpty():
+
+            empty_predictions: DataFrame = (
+                classification_training_dataset
+                .select('unique_id', 'ds')
+                .withColumn('y_pred', F.lit(None).cast('double'))
+                .withColumn('classification', F.lit(None).cast('string'))
+                .withColumn('cutoff', F.lit(None).cast('string'))
+                .limit(0)
+            )
+
+            logger.info(f"[{step_name}] There is no Training Data for the classification '{self.classification}' Skipping The Training Process.\n")
+
+            return empty_predictions
+        
+        model_spec: ModelSpec = self.cluster_spec_selector.get_spec_by_classification(classification = self.classification)
+
+        models: List[DistributedModel] = self.model_factory.built_models(models_config = model_spec.models)
+
+        distributed_forecast_engine: DistributedForecastingEngineInterface = DistributedForecastingEngine(models = models,
+                                                                                                          frequency = frequency,
+                                                                                                          lags = model_spec.lags,
+                                                                                                          lag_transforms = model_spec.lag_transforms,
+                                                                                                          target_transforms = model_spec.target_transforms)
+        static_features: List[str] = static_features or []
+
+        cross_validation_dataframe: DataFrame = distributed_forecast_engine.cross_validation(training_dataset = classification_training_dataset,
+                                                                                            windows = windows,
+                                                                                            periods_for_each_window = periods_for_each_window,
+                                                                                            static_features = static_features)
+        
+        prediction_column: List[str] =[ col for col in cross_validation_dataframe.columns if col not in ['unique_id', 'ds', 'cutoff', 'y'] ]
+
+        cross_validation_dataframe: DataFrame = (cross_validation_dataframe
+                                                .withColumnRenamed(prediction_column[0], 'y_pred')
+                                                .withColumn('classification', self.classification)
+                                                )
+        return cross_validation_dataframe
+        
+
+
 
 
 
