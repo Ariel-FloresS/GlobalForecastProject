@@ -17,3 +17,5 @@ class GlobalForecastPipelineInterface(ABC):
                     periods_for_each_window:int,
                     static_features:Optional[List[str]] = None)->DataFrame:
         raise NotImplementedError
+
+    

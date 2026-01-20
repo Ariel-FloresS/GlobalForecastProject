@@ -84,6 +84,8 @@ class DistributedForecastingEngine(DistributedForecastingEngineInterface):
     
     def cross_validation(self, training_dataset:DataFrame, windows:int,
                         periods_for_each_window:int, static_features:Optional[List[str]] = None)->DataFrame:
+
+        training_dataset: DataFrame = training_dataset.withColumn("ds", F.to_timestamp("ds"))
         
         cross_validation_dataframe: DataFrame = self.distributed_ml_forecast.cross_validation(df = training_dataset,
                                                                                               n_windows = windows,

@@ -1,7 +1,7 @@
 from .global_forecast_pipeline_interface import GlobalForecastPipelineInterface
 from model.data_layer.repositories.training_data import  TrainingDataRepository
 from model.data_layer.repositories.forecast_data import ForecastDataRepositoryInterface, ForecastDataRepository
-from model.data_layer.dataset_partitioning import  DatasetPartitioning
+from model.data_layer.dataset_partitioning import  DatasetPartitioning, DatasetPartitioningInterface
 from model.business_layer.data_preparation import DataPreparationInterface, DataPreparation
 from model.business_layer.forecasting.cluster_spec_selector import ClusterSpecSelector
 from model.business_layer.forecasting.model_factory import ModelFactory
@@ -113,12 +113,16 @@ class GlobalForecastPipeline(GlobalForecastPipelineInterface):
                     periods_for_each_window:int,
                     static_features:Optional[List[str]] = None)->DataFrame:
       
-      
+      dataset_partitioning: DatasetPartitioningInterface =  DatasetPartitioning(spark = self.spark)
+
+      training_dataset_partition: DataFrame = dataset_partitioning.get_dataset_partition(dataset = training_dataset,
+                                                                                            partition_column = 'unique_id')
         
       segmented_forecast: SegmentedForecastOrchestatorInterface = SegmentedForecastOrchestator(classification = classification, 
                                                                                               cluster_spec_selector = ClusterSpecSelector(),
                                                                                               model_factory = ModelFactory())
-      return segmented_forecast.cross_validation(training_dataset = training_dataset,
+                                                                                              
+      return segmented_forecast.cross_validation(training_dataset = training_dataset_partition,
                                           frequency = frequency,
                                           windows = windows,
                                           periods_for_each_window = periods_for_each_window,
