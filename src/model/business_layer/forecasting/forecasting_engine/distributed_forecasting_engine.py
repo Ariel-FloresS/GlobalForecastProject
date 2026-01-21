@@ -5,6 +5,7 @@ from model.business_layer.forecasting.model_factory import DistributedModel
 from typing import List, Optional, Dict, Any, Self
 import pandas as pd
 import pyspark.sql.functions as F
+from mlforecast.forecast import MLForecast
 
 
 class DistributedForecastingEngine(DistributedForecastingEngineInterface):
@@ -101,6 +102,10 @@ class DistributedForecastingEngine(DistributedForecastingEngineInterface):
             raise ValueError("You can't save an unfitted model. Call fit() first.")
         
         self.distributed_ml_forecast.save(path = path)
+        
+
+    def to_local(self)->MLForecast:
+        return self.distributed_ml_forecast.to_local()
         
         
 

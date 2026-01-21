@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from pyspark.sql import DataFrame, SparkSession
 from typing import List, Optional, Self
+from mlforecast.forecast import MLForecast
 
 class DistributedForecastingEngineInterface(ABC):
 
@@ -24,4 +25,8 @@ class DistributedForecastingEngineInterface(ABC):
     @classmethod
     @abstractmethod
     def load(cls, path: str, engine: SparkSession) -> Self:
+        raise NotImplementedError
+    
+    @abstractmethod
+    def to_local(self)->MLForecast:
         raise NotImplementedError
