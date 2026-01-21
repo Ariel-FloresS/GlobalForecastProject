@@ -1,0 +1,1 @@
+from .artefact_spec import ArtefactSpec
