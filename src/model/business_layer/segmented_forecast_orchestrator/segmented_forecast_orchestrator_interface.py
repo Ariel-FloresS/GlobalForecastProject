@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from pyspark.sql import DataFrame
-from typing import List, Optional, Dict
-from model.business_layer.forecasting.model_factory import  LocalModel
+from typing import List, Optional
+from model.data_layer.dtos import ArtefactSpec
 
 
 class SegmentedForecastOrchestatorInterface(ABC):
@@ -22,7 +22,7 @@ class SegmentedForecastOrchestatorInterface(ABC):
     def train_and_get_local_model(self,
                     training_dataset: DataFrame,
                     frequency:str,
-                    static_features:Optional[List[str]] = None)->Dict[str,LocalModel]:
+                    static_features:Optional[List[str]] = None)->ArtefactSpec:
         raise NotImplementedError
     
     

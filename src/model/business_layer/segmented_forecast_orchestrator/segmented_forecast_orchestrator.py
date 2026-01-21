@@ -3,10 +3,11 @@ from model.business_layer.forecasting.cluster_spec_selector import ClusterSpecSe
 from model.business_layer.forecasting.model_factory import ModelFactoryInterface, DistributedModel, LocalModel
 from model.business_layer.forecasting.forecasting_engine import DistributedForecastingEngineInterface, DistributedForecastingEngine
 from model.business_layer.forecasting.config import ModelSpec
+from model.data_layer.dtos import ArtefactSpec
 from pyspark.sql import DataFrame
 from pyspark.sql.column import Column
 import pyspark.sql.functions as F
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 from loguru import logger
 
 
@@ -151,7 +152,7 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
     def train_and_get_local_model(self,
                     training_dataset: DataFrame,
                     frequency:str,
-                    static_features:Optional[List[str]] = None)->Dict[str,LocalModel]:
+                    static_features:Optional[List[str]] = None)->ArtefactSpec:
         
         step_name: str = self.__class__.__name__
 
@@ -180,34 +181,21 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
         
         distributed_forecast_engine.fit(training_dataset = classification_training_dataset, static_features = static_features)
 
+        feature_columns: List[str] = (distributed_forecast_engine
+                                      .preprocess(training_dataset = classification_training_dataset)
+                                      .drop('unique_id', 'ds', 'y').columns
+                                    )
+
         train_distributed_models: Dict[DistributedModel] = distributed_forecast_engine.distributed_ml_forecast.models_
 
-        if len(train_distributed_models) != 1:
+        model_name, local_model = self.model_factory.built_local_model(distributed_model = train_distributed_models)
 
-            raise ValueError(f"Expected exactly 1 model, got {len(train_distributed_models)}: {list(train_distributed_models.keys())}")
+        return ArtefactSpec(model_name =model_name,
+                            classification = self.classification,
+                            local_model = local_model,
+                            features_columns = feature_columns)
+
         
-        model_name: str = next(iter(train_distributed_models.keys()))
-
-        match model_name:
-
-            case 'SparkXGBForecast':
-
-                from mlforecast.distributed.models.spark.xgb import SparkXGBForecast
-
-                xgboost: LocalModel = SparkXGBForecast.extract_local_model(trained_model = train_distributed_models['SparkXGBForecast'])
-
-                return {'XGBRegressor', xgboost}
-            
-            case 'SparkLGBMForecast':
-
-                from mlforecast.distributed.models.spark.lgb import SparkLGBMForecast
-
-                lgbm: LocalModel = SparkLGBMForecast.extract_local_model(trained_model = train_distributed_models['SparkLGBMForecast'])
-
-                return {'LGBMRegressor', xgboost}
-        
-            case _:
-                raise ValueError(f"Unsupported model key: {model_name}")
         
         
 
