@@ -30,3 +30,6 @@ class DistributedForecastingEngineInterface(ABC):
     @abstractmethod
     def to_local(self)->MLForecast:
         raise NotImplementedError
+    @abstractmethod
+    def preprocess(self, training_dataset: DataFrame, static_features:Optional[List[str]] = None)->DataFrame:
+        raise NotImplementedError

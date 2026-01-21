@@ -62,6 +62,8 @@ class DistributedForecastingEngine(DistributedForecastingEngineInterface):
 
     def fit(self, training_dataset:DataFrame, static_features:Optional[List[str]] = None)->Self:
 
+        training_dataset: DataFrame = training_dataset.withColumn("ds", F.to_timestamp("ds"))
+
         self.distributed_ml_forecast.fit(df =  training_dataset, static_features = static_features)
 
         self._is_trained = True
@@ -106,6 +108,15 @@ class DistributedForecastingEngine(DistributedForecastingEngineInterface):
 
     def to_local(self)->MLForecast:
         return self.distributed_ml_forecast.to_local()
+    
+    def preprocess(self, training_dataset: DataFrame, static_features:Optional[List[str]] = None)->DataFrame:
+
+
+        training_dataset: DataFrame = training_dataset.withColumn("ds", F.to_timestamp("ds"))
+
+        return self.distributed_ml_forecast.preprocess(df = training_dataset,
+                                                       static_features = static_features)
+
         
         
 
