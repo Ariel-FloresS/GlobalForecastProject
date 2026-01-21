@@ -6,9 +6,10 @@ from model.business_layer.data_preparation import DataPreparationInterface, Data
 from model.business_layer.forecasting.cluster_spec_selector import ClusterSpecSelector
 from model.business_layer.forecasting.model_factory import ModelFactory
 from model.business_layer.segmented_forecast_orchestrator import SegmentedForecastOrchestatorInterface, SegmentedForecastOrchestator
+from model.business_layer.forecasting.model_factory import  LocalModel
 from feature_store.presentation_layer import  FeatureStore
 from pyspark.sql import DataFrame, SparkSession
-from typing import List, Optional
+from typing import List, Optional, Dict
 from loguru import logger
 import pyspark.sql.functions as F
 
@@ -178,6 +179,32 @@ class GlobalForecastPipeline(GlobalForecastPipelineInterface):
       logger.info(banner_end)
       
       return backtesting_dataframe_output
+    
+
+    def _train_and_get_local_model_one_classification(self,
+                                                      training_dataset: DataFrame,
+                                                      classification:str,
+                                                      frequency:str,
+                                                      static_features:Optional[List[str]] = None )->Dict[str, LocalModel]:
+      
+      dataset_partitioning: DatasetPartitioningInterface =  DatasetPartitioning(spark = self.spark)
+
+      training_dataset_partition: DataFrame = dataset_partitioning.get_dataset_partition(dataset = training_dataset,
+                                                                                            partition_column = 'unique_id')
+      
+      segmented_forecast: SegmentedForecastOrchestatorInterface = SegmentedForecastOrchestator(classification = classification, 
+                                                                                              cluster_spec_selector = ClusterSpecSelector(),
+                                                                                              model_factory = ModelFactory())
+      
+      return segmented_forecast.train_and_get_local_model(training_dataset = training_dataset_partition,
+                                                          frequency = frequency,
+                                                          static_features = static_features)
+
+   
+       
+       
+
+      
       
       
 
