@@ -4,6 +4,7 @@ from mlforecast.distributed.forecast import DistributedMLForecast
 from model.business_layer.forecasting.model_factory import DistributedModel
 from typing import List, Optional, Dict, Any, Self
 import pandas as pd
+import pyspark.sql.functions as F
 
 
 class DistributedForecastingEngine(DistributedForecastingEngineInterface):
