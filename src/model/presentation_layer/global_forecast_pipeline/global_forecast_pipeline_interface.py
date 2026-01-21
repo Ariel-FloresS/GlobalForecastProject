@@ -17,5 +17,14 @@ class GlobalForecastPipelineInterface(ABC):
                     periods_for_each_window:int,
                     static_features:Optional[List[str]] = None)->DataFrame:
         raise NotImplementedError
+    
+    @abstractmethod
+    def feature_importance(self, 
+                          training_dataset: DataFrame,
+                          frequency: str,
+                          static_features:Optional[List[str]] = None)->DataFrame:
+        raise NotImplementedError
+    
+
 
     
