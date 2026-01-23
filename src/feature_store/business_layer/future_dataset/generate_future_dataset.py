@@ -9,13 +9,10 @@ from typing import List, Optional
 class GenerateFutureDataset(GenerateFutureDatasetInterface):
 
     def generate_dataset(self, spark: SparkSession, historical_dataframe:DataFrame,
-                        horizon:int, frequency:str , static_features:Optional[List[str]] = None)->DataFrame:
+                        horizon:int, frequency:str)->DataFrame:
         
-        list_static_features:List[str] = static_features or []
 
-        static_columns: List[str] = ['unique_id'] + list_static_features
-
-        ids_dataframe: DataFrame = historical_dataframe.select(static_columns).distinct()
+        ids_dataframe: DataFrame = historical_dataframe.select('unique_id').distinct()
 
         start_date: datetime.date = historical_dataframe.select(F.max("ds").alias("max_ds")).first()["max_ds"]
 

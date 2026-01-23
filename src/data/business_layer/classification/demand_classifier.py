@@ -28,7 +28,6 @@ class DemanClassifierFrepple(ClassifierInterface):
         step_name: str = self.__class__.__name__
 
         banner_top: str = f"\n{'='*84}\n[CLASSIFICATION START]   {step_name}\n{'='*84}"
-
         logger.info(banner_top)
 
         y_nonzero: Column = F.when(F.col('y') > 0, F.col('y'))
@@ -71,10 +70,12 @@ class DemanClassifierFrepple(ClassifierInterface):
                   )
                   .otherwise(F.lit("Lumpy"))
               )
-              .select("unique_id", "classification")
+              .select("unique_id", "classification", "adi", "cv2")
         )
 
-        out: DataFrame = dataset.join(metrics, on="unique_id", how="left")
+        out: DataFrame = dataset.join(metrics.select("unique_id", "classification"),
+                                    on="unique_id",
+                                    how="left")
 
         logger.info(f"{step_name}: Finished Added column `classification`.")
 
@@ -91,7 +92,38 @@ class DemanClassifierFrepple(ClassifierInterface):
         dist_str: str = " | ".join([f"{c}={dist.get(c, 0)}" for c in ordered_classes])
         logger.info(f"[CLASSIFICATION] {step_name}: series distribution -> {dist_str}")
 
-        
+        # Intra-cluster variance/deviation on ADI and CV2 (by class)
+        intracluster_df: DataFrame = (
+            metrics.groupBy("classification")
+            .agg(
+                F.count(F.lit(1)).alias("n_series"),
+
+                F.avg("adi").alias("mean_adi"),
+                F.stddev_pop("adi").alias("std_intra_adi"),
+                F.var_pop("adi").alias("var_intra_adi"),
+                F.expr("percentile_approx(adi, array(0.5, 0.9), 1000)").alias("adi_p50_p90"),
+
+                F.avg("cv2").alias("mean_cv2"),
+                F.stddev_pop("cv2").alias("std_intra_cv2"),
+                F.var_pop("cv2").alias("var_intra_cv2"),
+                F.expr("percentile_approx(cv2, array(0.5, 0.9), 1000)").alias("cv2_p50_p90"),
+            )
+        )
+
+       
+        intrarows: List[Row] = intracluster_df.collect()
+        for r in sorted(intrarows, key=lambda x: x["classification"]):
+            
+            adi_p50, adi_p90 = (r["adi_p50_p90"] or [None, None])
+            cv2_p50, cv2_p90 = (r["cv2_p50_p90"] or [None, None])
+
+            logger.info(
+                f"[INTRA CLUSTER] {step_name}: class={r['classification']} | "
+                f"n={int(r['n_series'])} | "
+                f"ADI mean={r['mean_adi']:.4f} std={r['std_intra_adi']:.4f} var={r['var_intra_adi']:.4f} p50={adi_p50} p90={adi_p90} | "
+                f"CV2 mean={r['mean_cv2']:.4f} std={r['std_intra_cv2']:.4f} var={r['var_intra_cv2']:.4f} p50={cv2_p50} p90={cv2_p90}"
+            )
+
         banner_bottom: str = f"\n{'='*84}\n[CLASSIFICATION END]   {step_name}\n{'='*84}"
         logger.info(banner_bottom)
 

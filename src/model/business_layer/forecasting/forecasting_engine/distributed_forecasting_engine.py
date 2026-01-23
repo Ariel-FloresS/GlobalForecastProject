@@ -4,6 +4,8 @@ from mlforecast.distributed.forecast import DistributedMLForecast
 from model.business_layer.forecasting.model_factory import DistributedModel
 from typing import List, Optional, Dict, Any, Self
 import pandas as pd
+import pyspark.sql.functions as F
+from mlforecast.forecast import MLForecast
 
 
 class DistributedForecastingEngine(DistributedForecastingEngineInterface):
@@ -60,6 +62,8 @@ class DistributedForecastingEngine(DistributedForecastingEngineInterface):
 
     def fit(self, training_dataset:DataFrame, static_features:Optional[List[str]] = None)->Self:
 
+        training_dataset: DataFrame = training_dataset.withColumn("ds", F.to_timestamp("ds"))
+
         self.distributed_ml_forecast.fit(df =  training_dataset, static_features = static_features)
 
         self._is_trained = True
@@ -84,6 +88,8 @@ class DistributedForecastingEngine(DistributedForecastingEngineInterface):
     
     def cross_validation(self, training_dataset:DataFrame, windows:int,
                         periods_for_each_window:int, static_features:Optional[List[str]] = None)->DataFrame:
+
+        training_dataset: DataFrame = training_dataset.withColumn("ds", F.to_timestamp("ds"))
         
         cross_validation_dataframe: DataFrame = self.distributed_ml_forecast.cross_validation(df = training_dataset,
                                                                                               n_windows = windows,
@@ -98,6 +104,19 @@ class DistributedForecastingEngine(DistributedForecastingEngineInterface):
             raise ValueError("You can't save an unfitted model. Call fit() first.")
         
         self.distributed_ml_forecast.save(path = path)
+        
+
+    def to_local(self)->MLForecast:
+        return self.distributed_ml_forecast.to_local()
+    
+    def preprocess(self, training_dataset: DataFrame, static_features:Optional[List[str]] = None)->DataFrame:
+
+
+        training_dataset: DataFrame = training_dataset.withColumn("ds", F.to_timestamp("ds"))
+
+        return self.distributed_ml_forecast.preprocess(df = training_dataset,
+                                                       static_features = static_features)
+
         
         
 

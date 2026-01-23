@@ -12,5 +12,5 @@ class FeatureServiceInterface(ABC):
     
     @abstractmethod
     def generate_future_dataset(self, spark:SparkSession, historical:DataFrame,
-                                horizon:int, frequency:str, static_features:Optional[List[str]] = None )->DataFrame:
+                                horizon:int, frequency:str)->DataFrame:
         raise NotImplementedError
