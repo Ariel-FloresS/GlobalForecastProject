@@ -144,7 +144,7 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
 
         cross_validation_dataframe: DataFrame = (cross_validation_dataframe
                                                 .withColumnRenamed(prediction_column[0], 'y_pred')
-                                                .withColumn('classification', self.classification)
+                                                .withColumn('classification',F.lit( self.classification))
                                                 )
         return cross_validation_dataframe
         
@@ -182,7 +182,8 @@ class SegmentedForecastOrchestator(SegmentedForecastOrchestatorInterface):
         distributed_forecast_engine.fit(training_dataset = classification_training_dataset, static_features = static_features)
 
         feature_columns: List[str] = (distributed_forecast_engine
-                                      .preprocess(training_dataset = classification_training_dataset)
+                                      .preprocess(training_dataset = classification_training_dataset,
+                                                  static_features = static_features)
                                       .drop('unique_id', 'ds', 'y').columns
                                     )
 
