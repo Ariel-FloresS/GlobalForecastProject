@@ -34,7 +34,7 @@ class ModelFactory(ModelFactoryInterface):
                 
         return  models
     
-    def built_local_model(self, distributed_model: Dict[DistributedModel])->Tuple[str,LocalModel]:
+    def built_local_model(self, distributed_model: Dict[str,DistributedModel])->Tuple[str,LocalModel]:
 
         if len(distributed_model) != 1:
 
