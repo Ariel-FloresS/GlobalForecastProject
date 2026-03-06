@@ -1,5 +1,5 @@
 from .data_cleaning_step_interface import DataCleaningStepInterface
-from pyspark.sql import DataFrame, Row
+from pyspark.sql import DataFrame
 import pyspark.sql.functions as F
 from loguru import logger
 
@@ -12,36 +12,47 @@ class DropShortSeriesStep(DataCleaningStepInterface):
     def apply_transformation(self, input_dataframe: DataFrame) -> DataFrame:
 
         step_name: str = self.__class__.__name__
+
         logger.info(f"Starting: {step_name} | min_records={self.min_records}")
 
         if self.min_records <= 0:
-            logger.info(f"{step_name}: min_records <= 0, returning original dataframe without changes")
+            logger.info(
+                f"{step_name}: min_records <= 0, returning original dataframe without changes"
+            )
             return input_dataframe
 
-        valid_count_expr: Row = F.sum(
-            F.when(
-                F.col('y').isNotNull() & ~F.isnan(F.col('y')),
-                F.lit(1)
-            ).otherwise(F.lit(0))
-        ).alias("n_records")
+        valid_values_df: DataFrame = (
+            input_dataframe
+            .filter(F.col("y").isNotNull() & ~F.isnan(F.col("y")))
+        )
 
         series_length_df: DataFrame = (
-            input_dataframe
+            valid_values_df
             .groupBy("unique_id")
-            .agg(valid_count_expr)
+            .agg(F.count(F.lit(1)).alias("n_records"))
         )
 
         short_series_df: DataFrame = (
             series_length_df
             .filter(F.col("n_records") < F.lit(self.min_records))
-            .select("unique_id")
+            .select("unique_id").distinct()
         )
 
+         
+        all_series_df: DataFrame = input_dataframe.select("unique_id").distinct()
+        zero_valid_df: DataFrame = all_series_df.join(series_length_df.select("unique_id").distinct(),
+                                                      on="unique_id", how="left_anti")
+
+         
+        short_series_df: DataFrame = short_series_df.unionByName(zero_valid_df).distinct()
+
         if short_series_df.limit(1).count() == 0:
-            logger.info(f"{step_name}: All series have at least {self.min_records} non-null records")
+            logger.info(
+                f"{step_name}: All series have at least {self.min_records} valid records"
+            )
             return input_dataframe
 
-        dropped_count: int = short_series_df.count()
+        dropped_count: int = short_series_df.select("unique_id").distinct().count()
 
         output_dataframe: DataFrame = (
             input_dataframe
@@ -50,7 +61,7 @@ class DropShortSeriesStep(DataCleaningStepInterface):
 
         logger.info(
             f"{step_name}: Dropping {dropped_count} time series "
-            f"with fewer than {self.min_records} non-null records in {self.target_col}"
+            f"with fewer than {self.min_records} valid records"
         )
 
         return output_dataframe
